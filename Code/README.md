@@ -93,7 +93,7 @@ All outputs are saved to `--run_dir`:
 
 - Vocabulary is built **from training sequences only** to prevent data leakage
 - `<PAD>` is always assigned index 0 for Keras masking compatibility
-- Google Colab `drive.mount` calls have been removed; all paths are now CLI arguments
+
 
 ---
 
