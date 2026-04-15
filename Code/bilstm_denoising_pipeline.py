@@ -39,7 +39,7 @@ from tensorflow.keras.callbacks import EarlyStopping, CSVLogger
 
 
 # ==============================================================================
-# [Module 2] CONFIG — paths now come from CLI args (see __main__ block below)
+# [Module 2] CONFIG 
 # ==============================================================================
 CONFIG = {
     # Model Hyperparameters
@@ -70,7 +70,7 @@ CONFIG = {
 
 
 # ==============================================================================
-# [Module 3] Environment Setup (Colab drive.mount replaced with os.makedirs)
+# [Module 3] Environment Setup 
 # ==============================================================================
 def setup_environment(run_dir):
     print("--- [Step 2] Setting up environment ---")
@@ -89,7 +89,7 @@ def save_log(text, also_print=True):
 
 
 # ==============================================================================
-# [Module 4] Data Engine: Loading, Splitting, & Persistence
+# [Module 4] Data Engine: Loading, and Splitting
 # ==============================================================================
 def save_fasta_split(sequences, file_path, prefix="seq"):
     """Saves a list of strings as a FASTA file for external use."""
