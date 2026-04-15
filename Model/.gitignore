@@ -1,0 +1,28 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.egg-info/
+dist/
+build/
+.env
+venv/
+.venv/
+
+# Data & Model outputs (too large for Git — use Git LFS or cloud storage)
+runs/
+*.fasta
+*.npz
+*.keras
+*.h5
+*.png
+*.csv
+training_log.txt
+
+# Jupyter / Colab
+.ipynb_checkpoints/
+*.ipynb
+
+# OS
+.DS_Store
+Thumbs.db
