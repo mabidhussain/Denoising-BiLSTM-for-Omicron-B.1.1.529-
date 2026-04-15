@@ -1,11 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-BiLSTM Denoising Pipeline for SARS-CoV-2 Omicron Spike Sequences
-=================================================================
-Original: Colab Notebook (Denoising_BILSTM_MODULAR_12APril.3)
-GitHub Version: Paths made configurable; Colab-specific calls removed.
-Foundation (model architecture, loss, training logic) unchanged.
-
+--BiLSTM Denoising Pipeline for SARS-CoV-2 Omicron Spike Sequences--
 Usage:
     python bilstm_denoising_pipeline.py \
         --fasta_path /path/to/your/sequences.fasta \
@@ -134,7 +129,7 @@ def load_and_preprocess_data(fasta_path, run_dir):
     )
     save_log(f"Data Segregated: Train={len(train_seqs)}, Val={len(val_seqs)}, Test={len(test_seqs)}")
 
-    # 2. Save Human-Readable FASTA splits
+    # 2. Save the FASTA splits
     train_path = os.path.join(run_dir, CONFIG['TRAIN_FASTA'])
     val_path   = os.path.join(run_dir, CONFIG['VAL_FASTA'])
     test_path  = os.path.join(run_dir, CONFIG['TEST_FASTA'])
@@ -166,6 +161,7 @@ def load_and_preprocess_data(fasta_path, run_dir):
 # ==============================================================================
 # [Module 5] Custom Loss & Metric Functions
 # ==============================================================================
+# loss caluclated only on canonical bases ATGC and or masked canonical bases i.e y true is A/T/G/C and y masked is canonical base
 loss_obj = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=False, reduction='none')
 
 
@@ -234,6 +230,8 @@ def build_loss_and_metric(full_vocab, char_to_int):
 # ==============================================================================
 # [Module 6] Model Builder
 # ==============================================================================
+# utilizes post layer normalization given the small batch
+# mask_zero as a custom loss is being implemented to avoid tensor rank broadcast issue
 def build_editor_model(seq_len, vocab_size, params, total_train_steps,
                        masked_sparse_cce, masked_accuracy):
     inputs  = Input(shape=(seq_len,), dtype='int32', name='inputs')
@@ -265,6 +263,7 @@ def build_editor_model(seq_len, vocab_size, params, total_train_steps,
 # ==============================================================================
 # [Module 7] Masking Helper & Training
 # ==============================================================================
+# randomly masks canonical base where p inititated tensor value is less than the assigned value i.e 20/30 etc
 def create_masked_input(sequences, mask_id, canonical_ids, prob):
     inputs = np.copy(sequences)
     is_canonical = np.isin(inputs, list(canonical_ids))
@@ -272,7 +271,6 @@ def create_masked_input(sequences, mask_id, canonical_ids, prob):
     final_mask   = is_canonical & should_mask
     inputs[final_mask] = mask_id
     return inputs
-
 
 # ==============================================================================
 # [Main] Entry Point
