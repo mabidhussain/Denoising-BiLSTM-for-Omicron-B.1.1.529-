@@ -267,16 +267,6 @@ def main(args):
     canonical_base_indices = {char_to_int[c] for c in core_bases if c in char_to_int}
     mask_token_id          = char_to_int['<MASK>']
 
-    # --- Padded length: use training FASTA if given, else fall back to vocab JSON path hint ---
-    if args.training_fasta and os.path.exists(args.training_fasta):
-        padded_seq_len = get_padded_seq_len(args.training_fasta)
-    else:
-        # If no training FASTA, derive from seed + generous buffer
-        seed_len       = len(str(next(SeqIO.parse(args.seed_fasta, 'fasta')).seq))
-        padded_seq_len = seed_len + 50
-        print(f"Warning: No training FASTA provided. Using padded_seq_len={padded_seq_len} (seed+50).")
-    print(f"Padded sequence length: {padded_seq_len}")
-
     # --- Custom objects ---
     masked_sparse_cce, masked_accuracy = build_custom_objects(char_to_int, full_vocab)
 
@@ -284,6 +274,25 @@ def main(args):
     logits_model = load_logits_model(
         args.model_path, vocab_size, masked_sparse_cce, masked_accuracy
     )
+    model_seq_len = logits_model.input_shape[1]
+
+    # --- Padded length ---
+    if args.training_fasta and os.path.exists(args.training_fasta):
+        padded_seq_len = get_padded_seq_len(args.training_fasta)
+        if padded_seq_len != model_seq_len:
+            print(
+                "Warning: training FASTA-derived padded length "
+                f"({padded_seq_len}) does not match model input length ({model_seq_len}). "
+                "Using model input length."
+            )
+            padded_seq_len = model_seq_len
+    else:
+        padded_seq_len = model_seq_len
+        print(
+            "Info: No training FASTA provided. Using padded_seq_len from loaded model: "
+            f"{padded_seq_len}."
+        )
+    print(f"Padded sequence length: {padded_seq_len}")
 
     # --- Seed ---
     print(f"\n[Step 7] Loading seed from: {args.seed_fasta}")
